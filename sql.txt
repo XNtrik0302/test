@@ -1,0 +1,100 @@
+//1
+
+DELIMITER $$
+CREATE PROCEDURE PROCEDURE_EMP()
+BEGIN 
+ SELECT * FROM employee; 
+ END $$
+DELIMITER ;
+
+//2
+
+DELIMITER $$
+CREATE PROCEDURE HR_ALLOWANCE(IN IN_empno INT)
+BEGIN
+SELECT empno,empname,salary-(salary*0.1) FROM employee where empno=IN_empno;
+END $$
+DELIMITER ;
+
+//3
+   
+   DELIMITER $$
+   CREATE PROCEDURE EMP_LEVEL(IN EMP_NO INT,OUT SAL VARCHAR(20))
+   BEGIN 
+   DECLARE AMOUNT float DEFAULT 0; 
+   SELECT SALARY into AMOUNT FROM employee where empno=empid; 
+   IF AMOUNT>50000  
+   then SET SAL="Platinium"; 
+   ELSEIF AMOUNT<=50000 AND AMOUNT<10000  
+   THEN SET SAL="Gold"; 
+   ELSE 
+   SET SAL="silver"; 
+   END IF; 
+   END $$
+   DELIMITER ;
+   
+//4
+   DELIMITER $$
+   CREATE FUNCTION HIKE(prev_sal FLOAT) RETURNS DECIMAL(9,2)
+   BEGIN 
+ DECLARE CURRENT_salary DECIMAL(9,2); 
+ SET CURRENT_salary=prev_sal+prev_sal*0.1; 
+ RETURN CURRENT_salary; 
+ END $$
+   DELIMITER ;
+   SELECT empno,empname,HIKE(salary) AS  CURRENT_salary FROM employee;
+   
+   //5
+
+DELIMITER $$
+CREATE PROCEDURE CURS1()
+BEGIN
+DECLARE empno INT;
+DECLARE empname varchar(25);
+DECLARE deptno INT;
+DECLARE sal INT;
+DECLARE v_finished INT DEFAULT 0;
+DECLARE CUR CURSOR FOR SELECT emp_no,emp_name,dept_no,salary from employee;
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_finished =1;
+OPEN CUR;
+get_emp:LOOP
+FETCH CUR INTO empno,empname,deptno,sal;
+IF v_finished=1 THEN
+LEAVE get_emp;
+END IF;
+SELECT empno,empname,deptno,sal;
+END LOOP get_emp;
+CLOSE CUR;
+END$$
+DELIMITER ;
+
+
+//6 
+
+DELIMITER $$
+CREATE PROCEDURE CURS2()
+BEGIN
+DECLARE sal_level VARCHAR(25);
+DECLARE empname varchar(25);
+DECLARE sal INT;
+DECLARE v_finished INT DEFAULT 0;
+DECLARE CUR CURSOR FOR SELECT salary,emp_name from employee;
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_finished =1;
+OPEN CUR;
+get_level:LOOP
+FETCH CUR INTO sal,empname;
+IF sal>=10000 THEN
+SET sal_level='PLATINUM';
+ELSEIF sal<10000 AND sal>5000 THEN
+SET sal_level='GOLD';
+ELSE
+SET sal_level='SILVER';
+END IF;
+SELECT empname,sal_level;
+IF v_finished=1 THEN
+LEAVE get_level;
+END IF;
+END LOOP get_level;
+CLOSE CUR;
+END $$
+DELIMITER ;
